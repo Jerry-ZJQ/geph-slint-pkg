@@ -1,3 +1,6 @@
 [submodule "geph5"]
 	path = geph5
 	url = https://github.com/geph-official/geph5.git
+[submodule "gephgui-slint"]
+	path = gephgui-slint
+	url = git@github.com:Jerry-ZJQ/gephgui-slint.git
