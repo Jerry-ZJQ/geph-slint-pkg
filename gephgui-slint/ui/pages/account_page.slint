@@ -1,0 +1,123 @@
+import { Colors } from "../theme/colors.slint";
+import { LogInCard, AccountInfoCard } from "../controls/account_cards.slint";
+import { Metrics } from "../theme/metrics.slint";
+import { Typography } from "../theme/typography.slint";
+import { AnimationBar } from "../controls/animation_bar.slint";
+
+import { LoginState, AccountStatus } from "../ui_state.slint";
+
+
+export component AccountLogInView inherits Rectangle {
+
+    in property <string> login_helptext;
+
+    callback login_requested(string);
+
+    background: Colors.background;
+
+    VerticalLayout {
+
+        padding: Metrics.padding_large;
+        spacing: Metrics.spacing_medium;
+
+        LogInCard {
+            helptext_1: login_helptext;
+            login_clicked(secret) => {
+                root.login_requested(secret);
+            }
+        }
+    }
+}
+
+export component LoggingWaitView inherits Rectangle {
+
+    background: Colors.background;
+
+    VerticalLayout {
+
+        padding: Metrics.padding_large;
+        spacing: Metrics.spacing_medium;
+
+        Text {
+            text: "Authenticating...";
+            font-size: Typography.font_section;
+            font-weight: Typography.weight_title;
+            color: Colors.text_main;
+        }
+
+        AnimationBar {
+            bar_height: Metrics.conn_anime_height;
+            bar_color: Colors.std_button;
+            running: true;
+            background: transparent;
+        }
+
+        Rectangle {
+            vertical-stretch: 1;
+        }
+    }
+}
+
+export component AccountLoggedView inherits Rectangle {
+
+    callback logout_requested();
+    callback manage_account_requested();
+
+    background: Colors.background;
+
+    VerticalLayout {
+
+        padding: Metrics.padding_large;
+        spacing: Metrics.spacing_medium;
+
+        AccountInfoCard {
+            manage_account_clicked => {
+                root.manage_account_requested();
+            }
+            logout_clicked => {
+                root.logout_requested();
+            }
+        }
+    }
+}
+
+export component AccountRegisterPage {
+    
+}
+
+export component AccountPage inherits Rectangle {
+
+    in property <LoginState> logging_state;
+
+    callback login_requested(string);
+    callback logout_requested();
+    callback manage_account_requested();
+
+    background: Colors.background;
+
+    if logging_state == LoginState.LoggedOut : AccountLogInView {
+        login_helptext: "Login with your account secret";
+        login_requested(secret) => {
+            root.login_requested(secret);
+        }
+    }
+
+    if logging_state == LoginState.Authenticating : LoggingWaitView {}
+
+    if logging_state == LoginState.LoggedIn : AccountLoggedView {
+
+        manage_account_requested => {
+            root.manage_account_requested();
+        }
+        logout_requested => {
+            root.logout_requested();
+        }
+    }
+
+    // if logging_state == LoginState.Unavailable : AccountLogInView {
+    //     login_helptext: "Login failed - Please check your input or Internet connection";
+    //     login_requested(secret) => {
+    //         root.login_requested(secret);
+    //     }
+    // }
+}

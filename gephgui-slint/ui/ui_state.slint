@@ -1,0 +1,104 @@
+export enum CurrentPage {
+    Home,
+    Account,
+    Setting,
+    About,
+}
+
+export enum ConnectionState { 
+    Disconnected,
+    Connecting,
+    Connected,
+}
+
+export enum LoginState {
+    LoggedOut,
+    Authenticating,
+    LoggedIn,
+    Unavailable,
+}
+
+export enum LoadLevel { 
+    Low,
+    Medium,
+    High,
+}
+
+export enum AccountLevel {
+    Free,
+    Plus,
+    Unknown
+}
+
+export global ConnInfo {
+    in property <ConnectionState> conn_state;
+    in property <string> country;
+    in property <string> city;
+    in property <string> exit_ip;
+    in property <string> bridge_ip;
+    in property <string> protocol;
+}
+
+export global AccountStatus {
+    in property <LoginState> login_status;
+    in property <string> secret;
+    in property <string> account_level;
+    in property <string> expire_date;
+    in property <string> remaining_days;
+    in property <string> remaining_usage;
+    in property <float> remaining_percentage;
+}
+
+export struct ServerEntry {
+    country: string,
+    city: string,
+    load: string,
+    load_level: LoadLevel,
+    enabled: bool,
+}
+
+export struct ServerSection {
+    category: string,
+    helptext: string,
+    servers: [ServerEntry],
+ }
+
+ export global ServerList {
+    in property <[ServerSection]> sections;
+ }
+
+export global SelectedServer {
+    in property <string> country;
+    in property <string> city;
+}
+
+export global TunnelSettings {
+    in-out property <bool> global_vpn: true;
+    in-out property <bool> bypass_china: false;
+    in-out property <bool> bypass_lan: false;
+    in-out property <bool> allow_direct: false;
+    in-out property <bool> ads_filter: false;
+    in-out property <bool> adult_filter: false;
+}
+
+export global ProxySettings {
+    in-out property <bool> enabled: false;
+    in-out property <bool> auto_config: false;
+    in-out property <bool> listening_all: false;
+    in-out property <int> socks5_port: 9909;
+    in-out property <int> http_port: 9910;
+}
+
+export enum SettingActions {
+    AllowDirect,
+    AdsFilter,
+    AdultFilter,
+    BypassLan,
+    BypassChina,
+    GlobalVPN,
+    LocalProxy,
+    AutoConfig,
+    ListenAll,
+    Sock5Port,
+    HttpPort,
+}

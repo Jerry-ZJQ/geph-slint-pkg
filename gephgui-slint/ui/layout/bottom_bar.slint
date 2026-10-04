@@ -1,0 +1,71 @@
+import { ConnectionCard } from "../controls/connection_card.slint";
+import { PrimaryButton } from "../controls/primary_button.slint";
+
+import { Metrics } from "../theme/metrics.slint";
+import { Colors } from "../theme/colors.slint";
+import { AnimationBar } from "../controls/animation_bar.slint";
+
+import { ConnInfo, AccountStatus, LoginState, ConnectionState } from "../ui_state.slint";
+
+export component BottomBar inherits Rectangle {
+
+    in property <bool> server_popup_opened;
+    in property <bool> anime_run: ConnInfo.conn_state == ConnectionState.Connecting ? true : false;
+    in property <bool> button_hollowed: ConnInfo.conn_state == ConnectionState.Disconnected ? false : true;
+
+    in property <bool> disabled: AccountStatus.login_status == LoginState.LoggedOut ? true : false;
+
+    callback toggle_server_popup();
+    callback toggle_connect();
+
+    height: Metrics.bottom_bar_height;
+    background: Colors.bottom_bar;
+
+    bottom_bar := VerticalLayout {
+
+        padding-left: Metrics.padding_extra;
+        padding-right: Metrics.padding_extra;
+        padding-top: Metrics.padding_small;
+        padding-bottom: Metrics.padding_medium;
+
+        spacing: Metrics.spacing_small;
+
+        // ConnectionCard Area
+        ConnectionCard {
+            server_popup_opened: root.server_popup_opened;
+            clicked => {
+                // debug("BottomBar callback");
+                root.toggle_server_popup();
+            }
+        }
+
+        // ConnectButton
+        PrimaryButton {
+            clicked => {
+                root.toggle_connect();
+            }
+            hollowed: button_hollowed;
+        }
+
+        // Connection Animation placeholder
+        AnimationBar {
+            running: root.anime_run;
+            bar_height: Metrics.conn_anime_height;
+            bar_color: Colors.pri_button;
+            background: transparent;
+        }
+    }
+
+    // An overlay to cover the BottomBar to block clicking when user is logged out
+    if root.disabled : Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: Colors.background;
+        opacity: 0.5;
+
+        TouchArea {
+            width: parent.width;
+            height: parent.height;
+        }
+    }
+}

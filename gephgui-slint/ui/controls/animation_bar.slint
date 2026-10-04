@@ -1,0 +1,31 @@
+import { Colors } from "../theme/colors.slint";
+import { Metrics } from "../theme/metrics.slint";
+
+export component AnimationBar inherits Rectangle {
+
+    in property <bool> running: false;
+    in property <length> bar_height;
+    in property <color> bar_color;
+
+    private property <float> phase: 0.0;
+
+    height: bar_height;
+    clip: true;
+    vertical-stretch: 0;
+
+    indicator := Rectangle {
+
+        width: 128px;
+
+        height: bar_height;
+
+        border-radius: Metrics.radius_anime_bar;
+
+        background: bar_color;
+
+        x:
+        running
+        ? - self.width + (parent.width + self.width) * mod(animation-tick(), 1500ms) / 1500ms
+        : - self.width;
+    }
+}

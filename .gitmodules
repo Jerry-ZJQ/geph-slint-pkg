@@ -1,0 +1,3 @@
+[submodule "geph5"]
+	path = geph5
+	url = https://github.com/geph-official/geph5.git

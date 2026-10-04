@@ -1,0 +1,26 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 512 512">
+
+    <!-- Outer circle -->
+    <circle
+        cx="256"
+        cy="256"
+        r="256"
+        fill="#1f1f1f"/>
+
+    <!-- Middle circle -->
+    <circle
+        cx="256"
+        cy="185"
+        r="185"
+        fill="#acacac"/>
+
+    <!-- Inner circle -->
+    <circle
+        cx="256"
+        cy="123"
+        r="123"
+        fill="#dddddd"/>
+
+</svg>

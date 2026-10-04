@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Runs as root at the end of the .pkg install. It registers the privileged geph
+# manager (the tunnel/proxy/kill-switch supervisor) as a LaunchDaemon so it runs
+# as root at boot, across reboots, independent of whether the GUI is open.
+#
+# Registration is owned by geph5 itself so the launchd definition and CLI stay
+# in lockstep. The installer supplies the one-time root authorization; the
+# manager writes and bootstraps its own plist.
+
+set -e
+
+APP="/Applications/Geph.app"
+MANAGER_BIN="$APP/Contents/Resources/geph"
+
+"$MANAGER_BIN" register-manager
+
+exit 0

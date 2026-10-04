@@ -1,0 +1,21 @@
+import { Icons } from "../theme/resources.slint";
+
+export component ExpandArrow inherits Image {
+
+    in property <bool> expanded: false;
+
+    source: Icons.expand_arrow;
+
+    width: 24px;
+    height: 24px;
+
+    image-fit: contain;
+
+    transform-rotation:
+        expanded ? 180deg : 0deg;
+
+    animate transform-rotation {
+        duration: 150ms;
+        easing: ease-in-out;
+    }
+}

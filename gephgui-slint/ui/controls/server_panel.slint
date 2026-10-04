@@ -1,0 +1,217 @@
+import { Metrics } from "../theme/metrics.slint";
+import { Colors } from "../theme/colors.slint";
+import { Typography } from "../theme/typography.slint";
+import { Icons } from "../theme/resources.slint";
+
+import { CountryFlags } from "../theme/resources.slint";
+import { LoadLevel, ServerEntry, ServerSection } from "../ui_state.slint";
+
+export component AutoButton inherits Rectangle {
+        
+    callback clicked();
+
+    height: Metrics.server_button_height;
+    border-radius: Metrics.radius_button;
+    border-width: Metrics.outline_slim;
+    border-color: Colors.divider;
+    background: Colors.sidebar;
+
+    clip: true;
+
+    TouchArea {
+
+        mouse-cursor: MouseCursor.pointer;
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    HorizontalLayout {
+
+        padding-left: Metrics.padding_medium;
+        padding-right: Metrics.padding_medium;
+        spacing: Metrics.spacing-medium;
+
+        Rectangle {
+            height: parent.height - Metrics.padding_medium;
+            width: self.height;
+            y: (parent.height - self.height) / 2; 
+            background: transparent;
+            clip: true;
+            Image {
+                source: Icons.auto_conn;
+                width: parent.width;
+                height: parent.height;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+        }
+
+        Rectangle {
+
+            horizontal-stretch: 1;
+            Text {
+                width: parent.width;
+                height: parent.height;
+                text: "Automatic";
+                horizontal-alignment: left;
+                vertical-alignment: center;
+                // y: 2px;
+                font-size: Typography.font_body;
+                font-weight: Typography.weight_title;
+                color: Colors.text_main;
+            } 
+        }
+    }
+}
+
+export component ServerButton inherits Rectangle {
+
+    // in property <image> country_flag;
+    in property <string> country;
+    in property <string> city;
+    in property <string> loading;
+    in property <LoadLevel> level;
+    in property <bool> enabled;
+    private property <color> load_color:
+        level == LoadLevel.High ? Colors.load_high :
+        level == LoadLevel.Medium ? Colors.load_medium :
+        Colors.load_low;
+
+    callback clicked(country: string, city: string);
+
+    height: Metrics.server_button_height;
+    border-radius: Metrics.radius_button;
+    border-width: Metrics.outline_slim;
+    border-color: Colors.divider;
+    background: enabled ? Colors.sidebar : #17171729;
+
+    clip: true;
+
+    if enabled : TouchArea {
+
+        mouse-cursor: MouseCursor.pointer;
+        clicked => {
+            root.clicked(root.country, root.city);
+        }
+    }
+
+    HorizontalLayout {
+
+        padding-left: Metrics.padding_medium;
+        padding-right: Metrics.padding_medium;
+        spacing: Metrics.spacing_medium;
+
+        Rectangle {
+            height: parent.height - Metrics.padding_medium *2;
+            width: self.height * 3 / 2;
+            y: (parent.height - self.height) / 2; 
+            background: transparent;
+            clip: true;
+            border-radius: Metrics.radius_flag;
+
+            CountryFlags {
+                country: root.country;
+                width: parent.width;
+                height: parent.height;
+            }
+        }
+
+        Rectangle {
+
+            horizontal-stretch: 1;
+            Text {
+                width: parent.width;
+                height: parent.height;
+                text: country + " / " + city;
+                horizontal-alignment: left;
+                vertical-alignment: center;
+                font-size: Typography.font_body;
+                font-weight: Typography.weight_title;
+                color: Colors.text_main;
+            } 
+        }
+
+        Rectangle {
+            width: 40px;
+            border-color: load_color;
+            border-width: Metrics.outline_slim;
+            border-radius: Metrics.radius_anime_bar;
+            height: parent.height - Metrics.padding_medium * 2;
+            y: (parent.height - self.height) / 2;
+
+            Text {
+                width: parent.width;
+                height: parent.height;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                text: loading;
+                font-size: Typography.font_caption;
+                color: load_color;
+            }
+        }
+    }
+}
+
+export component ServerDivider inherits Rectangle {
+
+    background: transparent;
+    height: Metrics.server_button_height / 4;
+}
+
+export component ServerSection inherits Rectangle {
+    
+    in property <string> server_type;
+    in property <string> helptext: 
+        root.server_type == "Core"
+        ? "Best balance of security and speed for everyday browsing."
+        : "Optimized for video services and region-locked media.";
+    in property <[ServerEntry]> servers;
+
+    callback server_button_clicked(country: string, city: string);
+
+    background: transparent;
+//    height: Metrics.server_button_height;
+
+    VerticalLayout {
+
+        spacing: Metrics.spacing_small;
+
+        ServerDivider {}
+
+        section_title := Text {
+
+            text: server_type;
+            color: Colors.text_main;
+            font-size: Typography.font_section;
+            font-weight: Typography.weight_title;
+            vertical-alignment: center;                
+        }
+
+        section_helptext := Text {
+            text: helptext;
+            color: Colors.text_aux;
+            font-size: Typography.font_caption;
+            wrap: word-wrap;
+            vertical-alignment: center;
+        }
+
+        VerticalLayout {
+
+            spacing: Metrics.padding_medium;
+
+            for server in root.servers : ServerButton {
+                country: server.country;
+                city: server.city;
+                loading: server.load;
+                level: server.load_level;
+                enabled: server.enabled;
+
+                clicked(country, city) => {
+                    root.server_button_clicked(country, city);
+                }
+            }
+        }
+    }
+}
+

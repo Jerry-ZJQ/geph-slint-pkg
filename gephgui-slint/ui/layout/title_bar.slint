@@ -1,0 +1,42 @@
+import { NavButton } from "../controls/nav_button.slint";
+import { Colors } from "../theme/colors.slint";
+import { Metrics } from "../theme/metrics.slint";
+import { Typography } from "../theme/typography.slint";
+
+export component TitleBar inherits Rectangle {
+
+    in property <string> title;
+    in property <image> geph_logo;
+
+    height: 48px;
+    background: Colors.title_bar;
+
+    HorizontalLayout {
+
+        padding: 10px;
+        alignment: start;
+        spacing: 26px;
+
+        Image {
+
+            source: root.geph_logo;
+            width: 28px;
+            height: 28px;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+
+        Rectangle {
+            horizontal-stretch: 1;
+            background: transparent;
+
+            Text {
+                vertical-alignment: center;
+                text: title;
+                font-size: Typography.font_title;
+                font-weight: Typography.weight_title;
+                color: #143542;
+            }
+        }
+    }
+}

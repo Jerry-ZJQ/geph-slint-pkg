@@ -1,0 +1,21 @@
+{
+    "name": "fluidsynth",
+    "buildsystem": "cmake-ninja",
+    "config-opts": [
+        "-DLIB_SUFFIX="
+    ],
+    "cleanup": [
+        "/bin",
+        "/include",
+        "/lib/pkgconfig",
+        "/share/man",
+        "*.so"
+    ],
+    "sources": [
+        {
+            "type": "archive",
+            "url": "https://github.com/FluidSynth/fluidsynth/archive/v2.2.0.tar.gz",
+            "sha256": "928fb16f307507485bd1d9b010dafba8c747bce5de2ba47ab1705944c87013b6"
+        }
+    ]
+}

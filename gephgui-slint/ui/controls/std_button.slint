@@ -1,0 +1,51 @@
+import { Metrics } from "../theme/metrics.slint";
+import { Colors } from "../theme/colors.slint";
+import { Typography } from "../theme/typography.slint";
+
+export component StdButton inherits Rectangle {
+
+    in property <string> btn_text: "Button";
+    in property <length> btn_height: Metrics.server_button_height;
+    in property <color> btn_color: Colors.std_button;
+    in property <bool> hollowed: false;
+
+    private property <float> button_scale: touch_area.pressed ? 0.97 : 1.0;
+
+    callback clicked();
+
+    height: btn_height;
+
+    border-radius: Metrics.radius_button;
+    border-width: Metrics.outline_thick;
+    border-color: btn_color;
+
+    background: hollowed ? Colors.background : btn_color;
+
+    transform-origin: {
+        x: self.width / 2,
+        y: self.height / 2
+    };
+
+    transform-scale: button_scale;
+
+    animate transform-scale {
+        duration: 50ms;
+        easing: ease-out;
+    }
+
+    touch_area := TouchArea {
+        mouse-cursor: MouseCursor.pointer;
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    text_content := Text {
+        text: btn_text;
+        font-size: parent.height / 2;
+        font-weight: Typography.weight_title;
+        color: hollowed ? btn_color : Colors.background;
+        vertical-alignment: center;
+        horizontal-alignment: center;
+    }
+}

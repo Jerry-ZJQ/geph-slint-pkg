@@ -1,0 +1,15 @@
+import { Metrics } from "../theme/metrics.slint";
+import { Colors } from "../theme/colors.slint";
+import { StdButton } from "std_button.slint";
+
+import { ConnInfo, AccountStatus, LoginState, ConnectionState } from "../ui_state.slint";
+
+export component PrimaryButton inherits StdButton {
+
+    btn_color: Colors.pri_button;
+    btn_height: Metrics.pri_button_height;
+    btn_text: 
+        ConnInfo.conn_state == ConnectionState.Disconnected ? "CONNECT" :
+        ConnInfo.conn_state == ConnectionState.Connecting ? "CANCEL" :
+        "DISCONNECT";
+}

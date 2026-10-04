@@ -1,0 +1,199 @@
+import { Colors } from "../theme/colors.slint";
+import { SettingSwitch, SettingComboBox, SettingSpinBox, SettingSection } from "../controls/setting_widgets.slint";
+import { Metrics } from "../theme/metrics.slint";
+import { ScrollView, Switch } from "std-widgets.slint";
+
+import { TunnelSettings, ProxySettings, SettingActions, AccountStatus, LoginState } from "../ui_state.slint";
+
+export component SettingsPage inherits Rectangle {
+
+    private property <bool> proxy_enabled: ProxySettings.enabled;
+
+    in property <bool> show_settings: AccountStatus.login_status != LoggedOut ? true : false;
+    in property <bool> plus_features: AccountStatus.account_level == "Plus" ? true : false;
+
+    callback setting_changed(action: SettingActions, value: int);
+
+    background: Colors.background;
+
+    ScrollView {
+
+        width: parent.width;
+        height: parent.height;
+
+        VerticalLayout {
+            
+            padding: Metrics.padding_large;
+            spacing: Metrics.spacing_large;
+
+            SettingSection {
+                setting_type: "General";
+
+                SettingComboBox {
+                    setting_title: "Language";
+                    helptext: "Select language";
+                }
+            }
+
+            if show_settings : SettingSection {
+                setting_type: "Connection";
+
+                SettingSwitch {
+                    switch_enabled: true;
+                    setting_title: "Allow Direct Connections";
+                    helptext: "Turn this off if your country has GFW!";
+                    toggle_state <=> TunnelSettings.allow_direct;
+
+                    switch_toggled => {
+                        debug("[Sling Settings]: Allow Direct toggled");
+                        root.setting_changed(SettingActions.AllowDirect, 0);
+                    }
+                }
+            }
+
+            if show_settings : SettingSection {
+                setting_type: "Features";
+
+                SettingSwitch {
+                    // Disable switch for Free Users
+                    switch_enabled: plus_features;
+                    setting_title: plus_features ? "Ads Filter" : "Ads Filter (Plus only)";
+                    helptext: "Filter ads and trackers";
+                    toggle_state <=> TunnelSettings.ads_filter;
+
+                    switch_toggled => {
+                        debug("[Sling Settings]: Ads Filter toggled");
+                        root.setting_changed(SettingActions.AdsFilter, 0);
+                    }
+                }
+
+                SettingSwitch {
+                    // Disable switch for Free Users
+                    switch_enabled: plus_features;
+                    setting_title: plus_features ? "Adult Filter" : "Adult Filter (Plus only)";
+                    helptext: "Filter adult contents";
+                    toggle_state <=> TunnelSettings.adult_filter;
+
+                    switch_toggled => {
+                        debug("[Sling Settings]: Adult Filter toggled");
+                        root.setting_changed(SettingActions.AdultFilter, 0);
+                    }
+                }
+            }
+
+            if show_settings : SettingSection {
+                setting_type: "Split Tunneling";
+
+                SettingSwitch {
+                    switch_enabled: true;
+                    setting_title: "Allow LAN Access";
+                    helptext: "Let local area network traffic bypass Geph";
+                    toggle_state <=> TunnelSettings.bypass_lan;
+
+                    switch_toggled => {
+                        debug("[Sling Settings]: Bypass Lan toggled");
+                        root.setting_changed(SettingActions.BypassLan, 0);
+                    }
+                }
+
+                SettingSwitch {
+                    switch_enabled: true;
+                    setting_title: "Exclude PRC traffic";
+                    helptext: "Let Chinese tracffic bypass Geph";
+                    toggle_state <=> TunnelSettings.bypass_china;
+
+                    switch_toggled => {
+                        debug("[Sling Settings]: Bypass China toggled");
+                        root.setting_changed(SettingActions.BypassChina, 0);
+                    }
+                }
+            }
+
+            if show_settings : SettingSection {
+                setting_type: "Networking";
+
+                SettingSwitch {
+                    switch_enabled: true;
+                    setting_title: "VPN Mode";
+                    helptext: "Force all traffic to use Geph";
+                    toggle_state <=> TunnelSettings.global_vpn;
+
+                    switch_toggled => {
+                        debug("[Sling Settings]: Global VPN toggled");
+                        root.setting_changed(SettingActions.GlobalVPN, 0);
+                    }
+                }
+
+                SettingSwitch {
+                    switch_enabled: true;
+                    setting_title: "Local Proxy";
+                    helptext: "Expose Geph as SOCKS5/HTTP proxies";
+                    toggle_state <=> ProxySettings.enabled;
+
+                    switch_toggled => {
+                        debug("[Sling Settings]: Local Proxy toggled");
+                        root.setting_changed(SettingActions.LocalProxy, 0);
+                    }
+                }
+
+                // Only show proxy_setting items when local_proxy is on/true
+                if root.proxy_enabled : SettingSwitch {
+                    switch_enabled: root.proxy_enabled;
+                    setting_title: "Auto-configure Proxy";
+                    helptext: "Makes most browsers use Geph";
+                    toggle_state <=> ProxySettings.auto_config;
+
+                    switch_toggled => {
+                        debug("[Sling Settings]: Auto Config toggled");
+                        root.setting_changed(SettingActions.AutoConfig, 0);
+                    }
+                }
+
+                if root.proxy_enabled : SettingSwitch {
+                    switch_enabled: root.proxy_enabled;
+                    setting_title: "Listening on All Interfaces";
+                    helptext: "Allow other device in local network to use this device as proxy";
+                    toggle_state <=> ProxySettings.listening_all;
+
+                    switch_toggled => {
+                        debug("[Sling Settings]: Listen All toggled");
+                        root.setting_changed(SettingActions.ListenAll, 0);
+                    }
+                }
+
+                if root.proxy_enabled : SettingSpinBox {
+                    spinbox_enabled: root.proxy_enabled;
+                    setting_title: "SOCKS5 Port";
+                    helptext: "Port range 0 ~ 65535";
+                    max_number: 65535;
+                    port_value <=> ProxySettings.socks5_port;
+
+                    apply_value(target_value) => {
+                        root.setting_changed(SettingActions.Sock5Port, target_value);
+                    }
+                }
+
+                if root.proxy_enabled : SettingSpinBox {
+                    spinbox_enabled: root.proxy_enabled;
+                    setting_title: "HTTP Proxy Port";
+                    helptext: "Port range 0 ~ 65535";
+                    max_number: 65535;
+                    port_value <=> ProxySettings.http_port;
+
+                    apply_value(target_value) => {
+                        root.setting_changed(SettingActions.HttpPort, target_value);
+                    }
+                }
+            }  
+
+            Rectangle {
+                height: 20px;
+            }
+
+            Rectangle {
+                vertical-stretch: 1;
+            }
+            
+        }
+    }
+}

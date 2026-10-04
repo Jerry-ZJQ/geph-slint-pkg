@@ -1,0 +1,178 @@
+import { TitleBar } from "layout/title_bar.slint";
+import { SideBar } from "layout/side_bar.slint";
+import { BottomBar } from "layout/bottom_bar.slint";
+
+import { ConnectionCard } from "controls/connection_card.slint";
+import { PopupContainer} from "popup/popup_server.slint";
+
+import { HomePage } from "pages/home_page.slint";
+import { AccountPage } from "pages/account_page.slint";
+import { SettingsPage } from "pages/settings_page.slint";
+import { AboutPage } from "pages/about_page.slint";
+
+import { Colors } from "theme/colors.slint";
+import { Metrics } from "theme/metrics.slint";
+import { ServerButton, ServerSection, ServerDivider, AutoButton } from "controls/server_panel.slint";
+
+import { CountryFlags, Icons } from "theme/resources.slint";
+import { ServerView } from "popup/server_view.slint";
+import { AccountInfoCard } from "controls/account_cards.slint";
+
+import {
+    LoginState,
+    AccountStatus,
+    ConnInfo,
+    SelectedServer,
+    SettingActions,
+} from "ui_state.slint";
+
+import { GephTray } from "geph_tray.slint";
+export { GephTray } from "geph_tray.slint";
+
+// import { TestTray } from "geph_tray.slint";
+// export { TestTray } from "geph_tray.slint";
+
+// export globals for Rust sync & callbacks
+export { 
+    LoginState, 
+    AccountStatus, 
+    ConnInfo, 
+    SelectedServer, 
+    LoadLevel,
+    ServerList,
+    TunnelSettings,
+    ProxySettings,
+    SettingActions,
+} from "ui_state.slint";
+
+export component GephWindow inherits Window {
+
+    // Only defines font for MacOS and Windows
+    default-font-family:
+        Platform.os == macos
+            ? "Helvetica Neue"
+            : "Microsoft YaHei UI";
+
+    icon: Icons.gephlogo;
+
+    in-out property <int> current_page: AccountStatus.login_status == LoginState.LoggedOut ? 1 : 0;
+
+    in-out property <bool> server_popup_opened: false;
+    in-out property <bool> connect_toggled: false;
+
+    // in-out property <bool> anime_run: false;
+
+    private property <string> current_title:
+        server_popup_opened ? "Select Exit Server":
+        current_page == 0 ? "Home" :
+        current_page == 1 ? "Account" :
+        current_page == 2 ? "Settings" :
+        current_page == 3 ? "About":
+                            "";
+
+    callback login_requested(string);
+    callback logout_requested();
+    callback manage_account_requested();
+    callback auto_selected();
+    callback exit_selected(country: string, city: string);
+
+    callback toggle_connect();
+    callback setting_requested(action: SettingActions, value: int);
+    callback server_list_opened();
+
+    title: "Geph";
+
+    width: Metrics.main_window_width;
+    height: Metrics.main_window_height;
+
+    background: Colors.background;
+
+    VerticalLayout {
+
+        spacing: 0px;
+
+        TitleBar {
+            geph_logo: Icons.gephlogo;
+            title: root.current_title;
+        }
+
+        HorizontalLayout {
+
+            vertical-stretch: 1;
+
+            spacing: 0px;
+
+            SideBar {
+                current_page <=> root.current_page;
+                account_page_selected => {
+                    // debug("LoginState is:", AccountStatus.login_status);
+                }
+            }
+
+            if (root.current_page == 0) : HomePage {}
+
+            if (root.current_page == 1) : AccountPage {
+                logging_state: AccountStatus.login_status;
+
+                login_requested(secret) => {
+                    root.login_requested(secret);
+                    // debug("Secret submitted:", secret);
+                }
+
+                logout_requested => {
+                    root.logout_requested();
+                }
+
+                manage_account_requested => {
+                    root.manage_account_requested();
+                }
+            }
+
+            if (root.current_page == 2) : SettingsPage {
+                setting_changed(action, value) => {
+                    root.setting_requested(action, value);
+                }
+            }
+
+            if (root.current_page == 3) : AboutPage {}
+        }
+
+        BottomBar {
+
+            server_popup_opened: root.server_popup_opened;
+
+            toggle_server_popup => { 
+                root.server_popup_opened = !root.server_popup_opened;
+                // callback server list popup to trigger an immediate refresh
+                if root.server_popup_opened {
+                    root.server_list_opened();
+                }
+                // debug("Popup Triggered");
+            }
+
+            toggle_connect => {
+                root.toggle_connect();
+                // debug("Connect Toggled");
+            }
+        }
+    }
+
+    // Placeholder for Server List Popup
+    PopupContainer {
+        opened: root.server_popup_opened;
+
+        y: Metrics.title_bar_height;
+        height: Metrics.main_window_height - Metrics.title_bar_height - Metrics.bottom_bar_height;
+
+        ServerView {
+            server_selected(country, city) => {
+                root.exit_selected(country, city);
+                root.server_popup_opened = false;
+            }
+            auto_clicked => {
+                root.auto_selected();
+                root.server_popup_opened = false;
+            }
+        }
+    }
+}

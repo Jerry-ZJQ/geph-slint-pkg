@@ -1,0 +1,41 @@
+import { Colors } from "../theme/colors.slint";
+import { ServerSection, ServerButton, ServerDivider } from "../controls/server_panel.slint";
+import { CountryFlags } from "../theme/resources.slint";
+import { Metrics } from "../theme/metrics.slint";
+import { Typography } from "../theme/typography.slint";
+
+import { Icons } from "../theme/resources.slint";
+
+export component AboutPage inherits Rectangle {
+
+    background: Colors.background;
+
+    VerticalLayout {
+
+        padding: Metrics.padding_large;
+        spacing: Metrics.spacing_medium;
+
+        Rectangle {
+
+            background: Colors.card;
+            border-radius: Metrics.radius_card;
+            border-color: Colors.divider;
+            border-width: 1px;
+
+            VerticalLayout {
+                padding: 12px;
+                Text {
+                    text: "Version 0.1\n\nGephgui-slint is the GUI for Geph developed with Slint. Best for those don't like the offical WebUI.";
+                    font-size: Typography.font_body;
+                    color: Colors.text_main;
+                    wrap: word-wrap;
+                    vertical-alignment: center;
+                }
+            }
+        }
+        
+        Rectangle {
+            vertical-stretch: 1;
+        }
+    }
+}

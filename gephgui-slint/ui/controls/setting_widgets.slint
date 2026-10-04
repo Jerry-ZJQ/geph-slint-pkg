@@ -1,0 +1,190 @@
+import { Switch, ComboBox, SpinBox, VerticalBox } from "std-widgets.slint";
+import { Metrics } from "../theme/metrics.slint";
+import { Typography } from "../theme/typography.slint";
+import { Colors } from "../theme/colors.slint";
+import { SettingActions } from "../ui_state.slint";
+import { StdButton } from "std_button.slint";
+
+
+export component SettingSwitch inherits Rectangle { 
+
+    in property <string> setting_title;
+    in property <string> helptext;
+    in property <bool> switch_enabled;
+    in-out property <bool> toggle_state;
+
+    callback switch_toggled();
+
+    HorizontalLayout {
+
+        title_area := Rectangle {
+
+            VerticalLayout {
+                
+                title := Text {
+                    text: setting_title;
+                    font-size: Typography.font_body;
+                    font-weight: Typography.weight_title;
+                    color: Colors.text_main;
+                    vertical-alignment: center;
+                }
+
+                Text {
+                    text: helptext;
+                    font-size: Typography.font_caption;
+                    color: Colors.text_aux;
+                    wrap: word-wrap;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        Switch {
+            enabled: switch_enabled;
+            checked <=> root.toggle_state;
+            toggled => {
+                // debug("Switch checked: ", self.checked);
+                root.switch_toggled();
+            }
+        }
+    }
+}
+
+export component SettingComboBox inherits Rectangle {
+
+    in property <string> setting_title;
+    in property <string> helptext;
+
+    HorizontalLayout {
+
+        title_area := Rectangle {
+
+            VerticalLayout {
+                
+                title := Text {
+                    text: setting_title;
+                    font-size: Typography.font_body;
+                    font-weight: Typography.weight_title;
+                    color: Colors.text_main;
+                    vertical-alignment: center;
+                }
+
+                Text {
+                    text: helptext;
+                    font-size: Typography.font_caption;
+                    color: Colors.text_aux;
+                    wrap: word-wrap;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        ComboBox {
+            model: ["English"];
+            width: 120px;
+            height: 32px;
+            y: ( parent.height - self.height ) / 2;
+        }
+    }
+}
+
+export component SettingSpinBox inherits Rectangle {
+
+    in property <string> setting_title;
+    in property <string> helptext;
+    in property <int> max_number;
+    in property <int> port_value;
+    private property <int> target;
+    in property <bool> spinbox_enabled;
+
+    callback apply_value(target_value: int);
+
+    HorizontalLayout {
+
+        title_area := Rectangle {
+
+            VerticalLayout {
+                
+                title := Text {
+                    text: setting_title;
+                    font-size: Typography.font_body;
+                    font-weight: Typography.weight_title;
+                    color: Colors.text_main;
+                    vertical-alignment: center;
+                }
+
+                Text {
+                    text: helptext;
+                    font-size: Typography.font_caption;
+                    color: Colors.text_aux;
+                    wrap: word-wrap;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        SpinBox {
+            enabled: root.spinbox_enabled;
+            horizontal-alignment: right;
+            maximum: max_number;
+            value: port_value;
+            width: 120px;
+            height: 32px;
+            y: ( parent.height - self.height ) / 2;
+
+            edited(value) => {
+                target = value;
+            }
+        }
+
+        StdButton {
+            btn_text: "√";
+            btn_height: 20px;
+            btn_color: Colors.bottom_bar;
+            y: ( parent.height - self.height ) / 2;
+
+            clicked => {
+                root.apply_value(root.target);
+            }
+        }
+    }
+}
+
+export component SettingSection inherits Rectangle {
+
+    in property <string> setting_type;
+
+    background: transparent;
+
+    VerticalLayout {
+
+        spacing: Metrics.spacing_small;
+
+        section_title := Text {
+
+            text: setting_type;
+            color: Colors.text_main;
+            font-size: Typography.font_section;
+            font-weight: Typography.weight_title;
+            vertical-alignment: center;                
+        }
+
+        Rectangle {
+            border-radius: Metrics.radius_card;
+            border-color: Colors.divider;
+            border-width: 1px;
+            background: Colors.card;
+
+            VerticalLayout {
+                padding-left: Metrics.padding_large;
+                padding-right: Metrics.padding_large;
+                padding-top: Metrics.padding_medium;
+                padding-bottom: Metrics.padding_medium;
+                spacing: Metrics.spacing_medium;
+
+                // insert setting items
+                @children
+            }
+        }
+    }
+}

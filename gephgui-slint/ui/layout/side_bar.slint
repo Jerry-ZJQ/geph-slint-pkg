@@ -1,0 +1,56 @@
+import { NavButton } from "../controls/nav_button.slint";
+import { Colors } from "../theme/colors.slint";
+import { Icons } from "../theme/resources.slint";
+
+import { AccountStatus, LoginState } from "../ui_state.slint";
+
+export component SideBar inherits Rectangle {
+
+    width: 48px;
+    background: Colors.sidebar;
+
+    in-out property <int> current_page;
+
+    callback account_page_selected();
+
+    VerticalLayout {
+
+        NavButton {
+            icon: Icons.home;
+            selected: root.current_page == 0;
+            clicked => {
+                root.current_page = 0;
+            }
+        }
+
+        NavButton {
+            icon: Icons.account;
+            selected: root.current_page == 1;
+            clicked => {
+                root.current_page = 1;
+                root.account_page_selected();
+            }
+        }
+
+        NavButton {
+            icon: Icons.settings;
+            selected: root.current_page == 2;
+            clicked => {
+                root.current_page = 2;
+            }
+        }
+
+        NavButton {
+            icon: Icons.about;
+            selected: root.current_page == 3;
+            clicked => {
+                root.current_page = 3;
+            }
+        }
+
+        Rectangle {
+            vertical-stretch: 1;
+            background: transparent;
+        }
+    }
+}

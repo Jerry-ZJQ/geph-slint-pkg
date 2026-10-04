@@ -1,0 +1,63 @@
+[package]
+name = "gephgui-slint"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.104"
+chrono = "0.4.45"
+flume = "0.12.0"
+geph5-broker-protocol = "0.4.2"
+geph5-misc-rpc = "0.4.2"
+geph5-rt = "0.3.6"
+image = "0.25.10"
+isocountry = "0.3.2"
+libc = "0.2.189"
+log = "0.4.34"
+nanorpc = "0.1.13"
+rfd = "0.17.2"
+serde = "1.0.229"
+serde_json = "1.0.151"
+slint = { version = "1.17.1", features = ["renderer-skia"] }
+tokio = { version = "1.53.1", features = ["rt", "time", "sync", "macros"] }
+tray-icon = "0.26.0"
+winit = "0.30.13"
+winres = "0.1.12"
+tiny_http = "0.12"
+sys-locale = "0.3.2"
+
+[build-dependencies]
+slint-build = "1.17.1"
+
+# ShellExecuteExW("runas") for the bootstrap's UAC-elevated `geph5 register-manager`
+# repair path (bootstrap.rs); same windows-sys line as geph5 itself.
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = [
+    "Win32_Foundation",
+    "Win32_System_Registry", # SHELLEXECUTEINFOW embeds an HKEY
+    "Win32_System_Threading",
+    "Win32_UI_Shell",
+] }
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1.12"
+
+[patch.crates-io]
+blind-rsa-signatures = { path = "patches/blind-rsa-signatures-0.15.2" }
+i-slint-core = { path = "patches/i-slint-core-1.18.1" }
+
+[profile.dev]
+opt-level = 1
+debug = true
+incremental = true
+codegen-units = 256
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+panic = "unwind"
