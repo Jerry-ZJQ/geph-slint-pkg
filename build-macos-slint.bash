@@ -45,7 +45,7 @@ REPO_ROOT="$PWD"
 
 MACOS_DIR="$REPO_ROOT/macos"
 
-LOCAL_BUILD_ROOT="${GEPHGUI_PKG_BUILD_ROOT:-${XDG_CACHE_HOME:-$HOME/.cache}/gephgui-slint-pkg}"
+LOCAL_BUILD_ROOT="${GEPHGUI_PKG_BUILD_ROOT:-${XDG_CACHE_HOME:-$HOME/.cache}/geph-slint-pkg}"
 LOCAL_SRC="$LOCAL_BUILD_ROOT/src"
 LOCAL_MACOS="$LOCAL_BUILD_ROOT/macos"
 
@@ -59,9 +59,9 @@ GUI_BINARY="gephgui-slint"
 
 # Default: Apple Silicon.
 # For universal:
-#   ARCHS="x86_64-apple-darwin aarch64-apple-darwin" ./build-macos-slint.bash
+#   ARCHS="x86_64-apple-darwin aarch64-apple-darwin" bash build-macos-slint.bash
 # For x86_64
-#   ARCHS="x86_64-apple-darwin" ./build-macos-slint.bash
+#   ARCHS="x86_64-apple-darwin" bash build-macos-slint.bash
 ARCHS="${ARCHS:-aarch64-apple-darwin}"
 
 # Use offline Cargo builds by default, matching the official script.
@@ -344,76 +344,6 @@ lipo_or_copy \
 lipo_or_copy \
     "$BUILD_APP/Contents/Resources/geph5-client" \
     "${engine_inputs[@]}"
-
-# gui_inputs=()
-# mgr_inputs=()
-# engine_inputs=()
-
-# for t in $ARCHS; do
-#     export MACOSX_DEPLOYMENT_TARGET="$(min_os_for "$t")"
-
-#     echo ">> building Slint GUI for $t"
-
-#     CARGO_ARGS=()
-#     if [ "$CARGO_OFFLINE" = "1" ]; then
-#         CARGO_ARGS+=(--offline)
-#     fi
-
-#     cargo install \
-#         "${CARGO_ARGS[@]}" \
-#         --force \
-#         --locked \
-#         --target "$t" \
-#         --path "$LOCAL_SRC/gephgui-slint" \
-#         --root "$CARGO_OUT/gui-$t"
-
-#     echo ">> building geph5 manager for $t"
-
-#     cargo install \
-#         "${CARGO_ARGS[@]}" \
-#         --force \
-#         --locked \
-#         --target "$t" \
-#         --path "$LOCAL_SRC/geph5/binaries/geph5-app" \
-#         --root "$CARGO_OUT/manager-$t"
-
-#     echo ">> building geph5-client for $t"
-
-#     cargo install \
-#         "${CARGO_ARGS[@]}" \
-#         --force \
-#         --locked \
-#         --target "$t" \
-#         --path "$LOCAL_SRC/geph5/binaries/geph5-client" \
-#         --root "$CARGO_OUT/engine-$t" \
-#         --features aws_lambda
-
-#     gui_inputs+=(
-#         "$CARGO_OUT/gui-$t/bin/gephgui-slint"
-#     )
-
-#     mgr_inputs+=(
-#         "$CARGO_OUT/manager-$t/bin/geph5"
-#     )
-
-#     engine_inputs+=(
-#         "$CARGO_OUT/engine-$t/bin/geph5-client"
-#     )
-# done
-
-# mkdir -p "$BUILD_APP/Contents/MacOS"
-
-# lipo_or_copy \
-#     "$BUILD_APP/Contents/MacOS/gephgui-slint" \
-#     "${gui_inputs[@]}"
-
-# lipo_or_copy \
-#     "$BUILD_APP/Contents/Resources/geph" \
-#     "${mgr_inputs[@]}"
-
-# lipo_or_copy \
-#     "$BUILD_APP/Contents/Resources/geph5-client" \
-#     "${engine_inputs[@]}"
 
 # # ---------------------------------------------------------------------------
 # # 5. Add uninstaller before signing

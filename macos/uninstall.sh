@@ -106,7 +106,7 @@ purge_user_home() {
         "$library/Cookies/$BUNDLE_ID.binarycookies" \
         "$library/Cookies/gephgui-wry.binarycookies" \
         "$library/Application Support/$BUNDLE_ID" \
-        "$library/Application Support/gephgui-wry" \
+        "$library/Application Support/Geph" \
         "$library/Containers/$BUNDLE_ID" \
         "$library/Application Scripts/$BUNDLE_ID" \
         "$library/Logs/Geph" \
