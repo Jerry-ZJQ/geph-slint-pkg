@@ -9,9 +9,6 @@ set -e
 cd "$(dirname "$(readlink -f "$0")")"
 . ./build-common.bash
 
-# export VERSION="${VERSION:-$(git describe --always)}"
-export VERSION="0.1.0"
-
 ARCH="${1:-64}"
 
 case "$ARCH" in
@@ -31,13 +28,13 @@ esac
 
 export WIN_ARCH
 
-ARTIFACT="output/geph-windows-${WIN_ARCH}-${VERSION#v}.exe"
+ARTIFACT="output/geph-slint-windows-${WIN_ARCH}-${VERSION#v}.exe"
 
 OUTPUT="output"
 mkdir -p "$OUTPUT"
 
 # Drop stale artifacts for this architecture.
-rm -f "$OUTPUT"/geph-windows-"$WIN_ARCH"-*.exe
+rm -f "$OUTPUT"/geph-slint-windows-"$WIN_ARCH"-*.exe
 
 # Scrub build junk that older versions of this script left in the
 # shared checkout.
@@ -112,8 +109,8 @@ unzip -o "$WIN/windows/IS6.zip" -d "$WIN/windows/iscc"
 # No WebUI/npm/frontend build is required.
 #
 cargo install \
-    --locked \
     --force \
+    --locked \
     --target "$TARGET" \
     --path "$LOCAL_SRC/gephgui-slint"
 

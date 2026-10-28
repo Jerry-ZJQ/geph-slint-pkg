@@ -22,10 +22,38 @@
 #     Do that initial clone/init on one machine and let it sync before running
 #     builds concurrently.
 
-# Machine-local root for everything a build writes. $HOME/.cache is assumed to
-# be local to the machine; override with GEPHGUI_PKG_BUILD_ROOT if you sync
-# your home directory too.
-LOCAL_BUILD_ROOT="${GEPHGUI_PKG_BUILD_ROOT:-${XDG_CACHE_HOME:-$HOME/.cache}/gephgui-pkg}"
+# Resolve the release version once for every platform. Prefer an explicit
+# VERSION override (useful for development builds); otherwise require HEAD to
+# point exactly at a Git tag, e.g. v0.2.0. The exported VERSION omits a leading v.
+get_version() {
+    local raw_version
+
+    if [ -n "${VERSION:-}" ]; then
+        raw_version="$VERSION"
+    else
+        if ! raw_version="$(git describe --tags --exact-match HEAD 2>/dev/null)"; then
+            echo "ERROR: HEAD is not tagged. Create a release tag or set VERSION explicitly." >&2
+            return 1
+        fi
+    fi
+
+    raw_version="${raw_version#v}"
+    if [ -z "$raw_version" ]; then
+        echo "ERROR: VERSION resolved to an empty string." >&2
+        return 1
+    fi
+
+    printf '%s\n' "$raw_version"
+}
+
+VERSION="$(get_version)" || return 1
+export VERSION
+
+echo ">> release version: $VERSION"
+
+# Machine-local root for everything a build writes. Override with
+# GEPHGUI_PKG_BUILD_ROOT if your home directory is synced between machines.
+LOCAL_BUILD_ROOT="${GEPHGUI_PKG_BUILD_ROOT:-${XDG_CACHE_HOME:-$HOME/.cache}/geph-slint-pkg}"
 LOCAL_SRC="$LOCAL_BUILD_ROOT/src"
 
 # One shared cargo target dir under the local root: keeps geph5/target &co out

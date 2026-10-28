@@ -18,7 +18,8 @@
 # Useful overrides:
 #   ARCHS="aarch64-apple-darwin"
 #   ARCHS="x86_64-apple-darwin aarch64-apple-darwin"
-#   GEPHGUI_PKG_BUILD_ROOT="$HOME/.cache/gephgui-pkg"
+#   GEPHGUI_PKG_BUILD_ROOT="$HOME/.cache/geph-slint-pkg"
+#   VERSION="0.2.1-dev" (override Git-tag detection for development builds)
 #   APP_SIGN_ID="Developer ID Application: ..."
 #   INSTALLER_SIGN_ID="Developer ID Installer: ..."
 #   NOTARY_PROFILE="geph-notary"
@@ -38,18 +39,14 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 REPO_ROOT="$PWD"
+. "$REPO_ROOT/build-common.bash"
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
 
 MACOS_DIR="$REPO_ROOT/macos"
-
-LOCAL_BUILD_ROOT="${GEPHGUI_PKG_BUILD_ROOT:-${XDG_CACHE_HOME:-$HOME/.cache}/geph-slint-pkg}"
-LOCAL_SRC="$LOCAL_BUILD_ROOT/src"
 LOCAL_MACOS="$LOCAL_BUILD_ROOT/macos"
-
-export CARGO_TARGET_DIR="$LOCAL_BUILD_ROOT/target"
 
 OUTPUT="$REPO_ROOT/output"
 
@@ -67,10 +64,7 @@ ARCHS="${ARCHS:-aarch64-apple-darwin}"
 # Use offline Cargo builds by default, matching the official script.
 CARGO_OFFLINE="${CARGO_OFFLINE:-0}"
 
-NORMAL_VERSION="${VERSION:-$(git -C "$REPO_ROOT" describe --always 2>/dev/null || echo 0.1.0)}"
-VERSION="${NORMAL_VERSION#v}"
-
-ARTIFACT="$OUTPUT/geph-macos-slint-${VERSION}.pkg"
+ARTIFACT="$OUTPUT/geph-slint-macos-${VERSION}.pkg"
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -98,57 +92,6 @@ lipo_or_copy() {
         cp "$1" "$out"
     else
         lipo -create -output "$out" "$@"
-    fi
-}
-
-publish() {
-    local src="$1"
-    local dst="$2"
-    local tmp
-
-    mkdir -p "$(dirname "$dst")"
-
-    tmp="$(dirname "$dst")/.${dst##*/}.partial"
-    cp "$src" "$tmp"
-    mv -f "$tmp" "$dst"
-}
-
-copy_tree() {
-    local src="$1"
-    local dst="$2"
-    shift 2
-
-    mkdir -p "$dst"
-
-    if command -v rsync >/dev/null 2>&1; then
-        local args=(-a --delete)
-        local ex
-
-        for ex in "$@"; do
-            args+=(--exclude "/$ex")
-        done
-
-        rsync "${args[@]}" "$src/" "$dst/"
-    else
-        # macOS normally has rsync installed on the Geph build machines.
-        # Keep a simple fallback for environments where it is unavailable.
-        rm -rf "$dst"
-        mkdir -p "$dst"
-
-        local tar_args=()
-        local ex
-
-        for ex in "$@"; do
-            tar_args+=(--exclude="./$ex")
-        done
-
-        (
-            cd "$src"
-            tar -cf - "${tar_args[@]}" .
-        ) | (
-            cd "$dst"
-            tar -xf -
-        )
     fi
 }
 
@@ -218,17 +161,7 @@ done
 # contain Cargo [patch]/path dependencies pointing at ../geph5.
 # ---------------------------------------------------------------------------
 
-echo ">> staging sources into $LOCAL_SRC"
-
-copy_tree \
-    "$REPO_ROOT/gephgui-slint" \
-    "$LOCAL_SRC/gephgui-slint" \
-    .git target
-
-copy_tree \
-    "$REPO_ROOT/geph5" \
-    "$LOCAL_SRC/geph5" \
-    .git target
+stage_sources
 
 # ---------------------------------------------------------------------------
 # 2. Clean local build area
